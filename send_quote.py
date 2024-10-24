@@ -8,16 +8,16 @@ SUPABASE_URL = os.getenv('SUPABASE_URL')
 SUPABASE_KEY = os.getenv('SUPABASE_KEY')
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# Function to get a random quote
-def get_random_quote():
-    response = supabase.table('quotes').select('*').execute()
+# Function to get a random unsent quote (sent_count = 0)
+def get_random_unsent_quote():
+    response = supabase.table('quotes').select('*').eq('sent_count', 0).execute()
     quotes = response.data
     if quotes:
-        return random.choice(quotes)  # Select a random quote
+        return random.choice(quotes)  # Select a random unsent quote
     else:
         return None
 
-# Function to increment the sent count
+# Function to increment the sent count for a specific quote
 def increment_sent_count(quote_id):
     # First, get the current sent_count for the quote
     response = supabase.table('quotes').select('sent_count').eq('id', quote_id).single().execute()
@@ -29,7 +29,6 @@ def increment_sent_count(quote_id):
     # Update the quote with the new sent_count
     supabase.table('quotes').update({'sent_count': new_count}).eq('id', quote_id).execute()
 
-
 # Function to send a quote to a webhook
 def send_quote_to_webhook(webhook_url, quote):
     data = {
@@ -39,9 +38,15 @@ def send_quote_to_webhook(webhook_url, quote):
     response = requests.post(webhook_url, json=data)
     return response.status_code
 
+# Function to reset all sent_count values to 0 (when all quotes have been sent)
+def reset_sent_counts():
+    supabase.table('quotes').update({'sent_count': 0}).execute()
+
 if __name__ == "__main__":
     webhook_url = "https://webhook.site/e2c2b183-d14c-4c7a-8dab-0b15d2d94f80"  # Replace with your webhook URL
-    random_quote = get_random_quote()
+
+    # Get a random unsent quote
+    random_quote = get_random_unsent_quote()
 
     if random_quote:
         # Send the quote to the webhook
@@ -51,4 +56,6 @@ if __name__ == "__main__":
         # Increment the sent count in the database
         increment_sent_count(random_quote['id'])
     else:
-        print("No quotes available")
+        # No unsent quotes available, reset all sent_count values
+        print("No unsent quotes available. Resetting all sent counts.")
+        reset_sent_counts()
