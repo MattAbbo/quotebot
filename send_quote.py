@@ -8,7 +8,7 @@ def send_quote_to_webhook(webhook_url, quote_data):
 
 if __name__ == "__main__":
     # Replace with your actual webhook URL (for testing, use https://webhook.site/)
-    webhook_url = "https://your-webhook-url.com"
+    webhook_url = "	https://webhook.site/e2c2b183-d14c-4c7a-8dab-0b15d2d94f80"
 
     # Define a list of quotes to be sent
     quotes = [
