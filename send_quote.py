@@ -31,7 +31,7 @@ def send_quote_to_webhook(webhook_url, quote):
     return response.status_code
 
 if __name__ == "__main__":
-    webhook_url = "https://your-webhook-url.com"  # Replace with your webhook URL
+    webhook_url = "https://webhook.site/e2c2b183-d14c-4c7a-8dab-0b15d2d94f80"  # Replace with your webhook URL
     random_quote = get_random_quote()
 
     if random_quote:
