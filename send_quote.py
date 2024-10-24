@@ -1,26 +1,45 @@
+import os
 import requests
-import time
+import random
+from supabase import create_client, Client
+
+# Initialize the Supabase client using environment variables
+SUPABASE_URL = os.getenv('SUPABASE_URL')
+SUPABASE_KEY = os.getenv('SUPABASE_KEY')
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+# Function to get a random quote
+def get_random_quote():
+    response = supabase.table('quotes').select('*').execute()
+    quotes = response.data
+    if quotes:
+        return random.choice(quotes)  # Select a random quote
+    else:
+        return None
+
+# Function to increment the sent count
+def increment_sent_count(quote_id):
+    supabase.table('quotes').update({'sent_count': 'sent_count + 1'}).eq('id', quote_id).execute()
 
 # Function to send a quote to a webhook
-def send_quote_to_webhook(webhook_url, quote_data):
-    response = requests.post(webhook_url, json=quote_data)
+def send_quote_to_webhook(webhook_url, quote):
+    data = {
+        "author": quote['author'],
+        "quote": quote['quote']
+    }
+    response = requests.post(webhook_url, json=data)
     return response.status_code
 
 if __name__ == "__main__":
-    # Replace with your actual webhook URL (for testing, use https://webhook.site/)
-    webhook_url = "	https://webhook.site/e2c2b183-d14c-4c7a-8dab-0b15d2d94f80"
+    webhook_url = "https://your-webhook-url.com"  # Replace with your webhook URL
+    random_quote = get_random_quote()
 
-    # Define a list of quotes to be sent
-    quotes = [
-        {"author": "Nietzsche", "quote": "That which does not kill us makes us stronger."},
-        {"author": "Rilke", "quote": "Let everything happen to you, beauty and terror."},
-        {"author": "Mary Oliver", "quote": "Tell me, what is it you plan to do with your one wild and precious life?"},
-        {"author": "Dylan Thomas", "quote": "Do not go gentle into that good night."},
-        {"author": "Emily Dickinson", "quote": "Hope is the thing with feathers."}
-    ]
+    if random_quote:
+        # Send the quote to the webhook
+        status = send_quote_to_webhook(webhook_url, random_quote)
+        print(f"Sent quote: '{random_quote['quote']}' by {random_quote['author']}, status code: {status}")
 
-    # Send each quote with a 5-minute delay between them
-    for quote in quotes:
-        status = send_quote_to_webhook(webhook_url, quote)
-        print(f"Sent quote: '{quote['quote']}' by {quote['author']}, status code: {status}")
-        time.sleep(300)  # Wait for 5 minutes (300 seconds) before sending the next quote
+        # Increment the sent count in the database
+        increment_sent_count(random_quote['id'])
+    else:
+        print("No quotes available")
