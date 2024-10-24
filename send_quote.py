@@ -19,8 +19,15 @@ def get_random_quote():
 
 # Function to increment the sent count
 def increment_sent_count(quote_id):
-    # Increment sent_count by 1 using raw SQL expression within update
-    supabase.table('quotes').update({'sent_count': {'increment': 1}}).eq('id', quote_id).execute()
+    # First, get the current sent_count for the quote
+    response = supabase.table('quotes').select('sent_count').eq('id', quote_id).single().execute()
+    current_count = response.data['sent_count']
+    
+    # Increment the sent_count by 1
+    new_count = current_count + 1
+
+    # Update the quote with the new sent_count
+    supabase.table('quotes').update({'sent_count': new_count}).eq('id', quote_id).execute()
 
 
 # Function to send a quote to a webhook
