@@ -40,7 +40,8 @@ def send_quote_to_webhook(webhook_url, quote):
 
 # Function to reset all sent_count values to 0 (when all quotes have been sent)
 def reset_sent_counts():
-    supabase.table('quotes').update({'sent_count': 0}).execute()
+    # Reset all sent_count values to 0
+    supabase.table('quotes').update({'sent_count': 0}).eq('TRUE', 'TRUE').execute()
 
 if __name__ == "__main__":
     webhook_url = "https://webhook.site/e2c2b183-d14c-4c7a-8dab-0b15d2d94f80"  # Replace with your webhook URL
