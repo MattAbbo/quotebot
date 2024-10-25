@@ -1,0 +1,17 @@
+[https://chatgpt.com/share/67193da1-51c4-8010-a11f-c7938a7cd2cd](https://chatgpt.com/share/67193da1-51c4-8010-a11f-c7938a7cd2cd "smartCard-inline")
+
+‌
+
+- fix:
+  - every reset of sent_count to zero shoudl still send a quote
+- new:
+  - send the quote to Telegram
+  - each time a quote is pulled (to be sent)
+    - also send the quote to OpenAI
+      - ask if the quote and author are correct
+        - if not, update quote and/or author
+        - if yes, neaten up quotation marks, spelling
+      - request two new quotes
+        - 1. Another quote by the same author (ensure no duplicates by searching on author)
+        - 2. A quote in similar sentiment to the quote
+        - add these new quotes to the database
